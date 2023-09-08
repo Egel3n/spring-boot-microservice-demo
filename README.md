@@ -11,8 +11,6 @@ All these allow you to test parts of your application independently from your da
 Add the `@Test` annotation to your test method,
 and that's all. You can run your test class and test your code. You can find my implementation under the order-service application.
 
-
----
 ### For integration tests:
 
 
@@ -46,7 +44,7 @@ public class ProductRepositoryTest {
 ```
 3. Add these to application.properties file which is located src/test/resources
 ```
- ,[JUnit]() and [Mockito]	spring.data.mongodb.database=OAuth2Sample
+	 spring.data.mongodb.database=OAuth2Sample
 	spring.data.mongodb().port=${mongodb.container.port}
 	spring.data.mongodb.host=localhost
 	spring.data.mongodb.auto-index-creation=true
@@ -54,4 +52,4 @@ public class ProductRepositoryTest {
 
 ##### now you can test your database in your test class.
 
-#### For their better documentation: [TestContainers](https://java.testcontainers.org/) , [JUnit](https://junit.org/junit5/docs/current/user-guide/) and [Mockito](https://site.mockito.org/) 
+#### For better documentation: [TestContainers](https://java.testcontainers.org/) , [JUnit](https://junit.org/junit5/docs/current/user-guide/) and [Mockito](https://site.mockito.org/) 
