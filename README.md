@@ -8,8 +8,10 @@ With `Mockito.mock(ExampleRepository.class)`, you can create a mock object
 and to make that object functional, you need to define its behavior.
 With `Mockito.when(ExampleRepoisotory).thenReturn(ExampleReturnObject)`, you can specify its behavior.
 All these allow you to test parts of your application independently from your database.
-Add the `@Test` annotation 	to your test method, -
+Add the `@Test` annotation to your test method,
 and that's all. You can run your test class and test your code. You can find my implementation under the order-service application.
+
+
 ---
 ### For integration tests:
 
