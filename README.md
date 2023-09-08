@@ -2,11 +2,11 @@
 #### Here is my simple documantation for simple microservice-demo project
 
 
-## You can visit other branch's READMEs
-- [tests](https://gitlab-dmz.macio.de/Ege.Gelen/microservice-demo/-/blob/tests/README.md?ref_type=heads&plain=0)
-- [circuit-breaker](https://gitlab-dmz.macio.de/Ege.Gelen/microservice-demo/-/blob/circuit-breaker/README.md?ref_type=heads)
-- [spring-boot-admin](https://gitlab-dmz.macio.de/Ege.Gelen/microservice-demo/-/blob/spring-boot-admin/README.md?ref_type=heads)
-- [visualizer](https://gitlab-dmz.macio.de/Ege.Gelen/microservice-demo/-/blob/docker-swarm-visualizer/README.md?ref_type=heads)
+## You can visit other branch's documantations.
+- [tests](https://github.com/Egel3n/spring-boot-microservice-demo/tree/tests)
+- [circuit-breaker](https://github.com/Egel3n/spring-boot-microservice-demo/tree/circuit-breakers)
+- [admin-config-servers](https://github.com/Egel3n/spring-boot-microservice-demo/tree/admin-config-server)
+- [auto-scaling-visualizer](https://github.com/Egel3n/spring-boot-microservice-demo/tree/auto-scalable-docker-swarm-visualizer)
 
 # Master Branch
 
