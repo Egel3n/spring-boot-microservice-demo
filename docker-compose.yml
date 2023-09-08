@@ -1,0 +1,192 @@
+version: "3.9"
+
+x-common-variables: &common-variables
+  COSMOSDB_CONNECTION_STRING: mongodb://testUsername:testPassword@database:27017
+  EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka
+
+services:
+
+  manager:
+    environment:
+      - VISUALIZER_TYPE=manager
+      - VISUALIZER_TASK=true
+      - VISUALIZER_TASK_AUTOSCALE=true
+    image: yandeu/visualizer:dev
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - agent_network
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+    labels:
+      - visualizer.manager
+    healthcheck:
+      test: curl -f http://localhost:3500/healthcheck || exit 1
+      interval: 10s
+      timeout: 2s
+      retries: 3
+      start_period: 5s
+    ports:
+      - '9500:3500'
+
+  agent:
+    environment:
+      - VISUALIZER_TYPE=agent
+      - VISUALIZER_TASK=true
+      - VISUALIZER_TASK_AUTOSCALE=true
+    image: yandeu/visualizer:dev
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - agent_network
+    deploy:
+      mode: global
+      placement:
+        constraints: [node.platform.os == linux]
+    labels:
+      - visualizer.agent
+    healthcheck:
+      test: curl -f http://localhost:9501/healthcheck || exit 1
+      interval: 10s
+      timeout: 2s
+      retries: 3
+      start_period: 5s
+
+
+  mongo:
+    image: mongo
+   # container_name: database
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: events
+      MONGO_INITDB_ROOT_USERNAME: testUsername
+      MONGO_INITDB_ROOT_PASSWORD: testPassword
+
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    depends_on:
+      - mongo
+    ports:
+      - 8081:8081
+
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: testUsername
+      ME_CONFIG_MONGODB_ADMINPASSWORD: testPassword
+      ME_CONFIG_MONGODB_SERVER: mongo
+
+
+
+  discovery-server:
+    build: ./discovery-server
+    image: discovery-server:latest
+    #container_name: discovery-server
+    ports:
+      - "8761:8761"
+    environment:
+      <<: *common-variables
+    labels:
+      - visualizer.autoscale.min=1
+      - visualizer.autoscale.max=5
+      - visualizer.autoscale.up.cpu=0.2
+      - visualizer.autoscale.down.cpu=0.1
+
+  api-gateway:
+    build: ./gateway
+    image: api-gateway:latest
+    # container_name: api-gateway
+    ports:
+      - "8085:8085"
+    links:
+      - discovery-server
+    depends_on:
+      - discovery-server
+    environment:
+      <<: *common-variables
+    deploy:
+      resources:
+        limits:
+          cpus: "0.20"
+    labels:
+      - visualizer.autoscale.min=1
+      - visualizer.autoscale.max=5
+      - visualizer.autoscale.up.cpu=0.1
+      - visualizer.autoscale.down.cpu=0.05
+
+  product-service:
+    build: ./product-service
+
+    image: product-service:latest
+    #container_name: product-service
+    ports:
+      - "7071:7071"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.20"
+
+    links:
+      - discovery-server
+      - mongo
+    depends_on:
+      - api-gateway
+      - discovery-server
+    environment:
+      <<: *common-variables
+    labels:
+      - visualizer.autoscale.min=1
+      - visualizer.autoscale.max=5
+      - visualizer.autoscale.up.cpu=0.1
+      - visualizer.autoscale.down.cpu=0.05
+
+  order-service:
+    build: ./order-service
+
+    image: order-service:latest
+    # container_name: order-service
+    ports:
+      - "7072:7072"
+    links:
+      - discovery-server
+      - mongo
+    depends_on:
+      - api-gateway
+      - discovery-server
+    environment:
+      <<: *common-variables
+    labels:
+      - visualizer.autoscale.min=1
+      - visualizer.autoscale.max=5
+      - visualizer.autoscale.up.cpu=0.2
+      - visualizer.autoscale.down.cpu=0.1
+
+  user-service:
+    build: ./user-service
+
+    image: user-service:latest
+    #  container_name: user-service
+    ports:
+      - "7070:7070"
+    links:
+      - discovery-server
+      - mongo
+    depends_on:
+      - api-gateway
+      - discovery-server
+    environment:
+      <<: *common-variables
+    labels:
+      - visualizer.autoscale.min=1
+      - visualizer.autoscale.max=5
+      - visualizer.autoscale.up.cpu=0.2
+      - visualizer.autoscale.down.cpu=0.1
+
+networks:
+  agent_network:
+    driver: overlay
+    attachable: true
